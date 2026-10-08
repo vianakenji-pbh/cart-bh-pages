@@ -20,17 +20,21 @@ main{padding-top:28px}.hero{padding:10px 0 22px}.hero .eyebrow{margin-bottom:12p
 .results-column{min-width:0}.results-column>.editorial{margin-top:0}.with-reader .comparison-wrap{overflow:visible}.with-reader .comparison thead{display:none}.with-reader .comparison,.with-reader .comparison tbody,.with-reader .comparison tr,.with-reader .comparison th,.with-reader .comparison td{display:block;width:100%!important}.with-reader .comparison tr{border:1px solid var(--line);border-radius:5px;margin:12px 0;padding:14px}.with-reader .comparison th,.with-reader .comparison td{border:0;padding:6px 0}.with-reader .comparison th:before,.with-reader .comparison td:before{content:attr(data-label);display:block;font-size:10px;color:var(--muted);margin-bottom:4px}.with-reader .comparison tr.selected-judgment{border-color:var(--green);background:var(--pale)}.with-reader .judgment-filters{gap:7px}.with-reader .judgment-filters .score{flex:1 0 42%;justify-content:center}.with-reader .judgment-publication{max-width:none}
 .side-main{margin-bottom:27px}.side-main a{display:block;padding:8px 10px;color:var(--muted);margin:0 0 4px;border-left:2px solid transparent}.side-main a[aria-current=page]{background:var(--pale);color:var(--green);border-left-color:var(--green);font-weight:600}
 
-/* Destaque limitado aos cartões de acórdãos, em busca e ao lado do leitor. */
-.result-card,.with-reader .comparison tbody tr[data-judgment]{transition:background-color .18s ease,box-shadow .18s ease,transform .18s ease,filter .18s ease,opacity .18s ease}
+/* Destaque individual dos acórdãos; os demais itens permanecem legíveis. */
+.result-card{transition:background-color .18s ease,box-shadow .18s ease,transform .18s ease}
+.comparison tbody tr[data-judgment]{transition:background-color .18s ease,box-shadow .18s ease}
 .with-reader .comparison tbody tr[data-reader-card]{cursor:pointer}
 .result-card:focus-visible,.with-reader .comparison tbody tr[data-judgment]:focus-visible{outline:2px solid var(--green);outline-offset:3px;background:var(--pale);box-shadow:0 3px 12px #245d4820}
+.comparison tbody tr[data-judgment]:focus-within{background:var(--pale);box-shadow:inset 3px 0 0 #88aa94}
 .judgment-chamber{display:block;font-size:10px;color:var(--green);font-weight:normal;line-height:1.5;margin-top:5px}
 .original-source{margin:0;display:inline-flex}
+.editorial>p[data-summary] a,.comparison th[scope=row]>a{color:var(--green);text-decoration:none;border-bottom:3px solid #c9dfcf;background-image:linear-gradient(to top,#c9dfcf 50%,transparent 50%);background-size:100% 200%;background-position:0 0;transition:background-position .3s ease;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.editorial>p[data-summary] a:focus-visible,.comparison th[scope=row]>a:focus-visible{background-position:0 100%;text-decoration:none}
 @media(hover:hover) and (pointer:fine){
-  .result-card:hover,.with-reader .comparison tbody tr[data-judgment]:hover{background:var(--pale);box-shadow:0 3px 12px #245d4820;transform:translateY(-1px)}
-  #results:has(>.result-card:hover)>.result-card:not(:hover):not(:focus-within),.with-reader .comparison tbody:has(>tr[data-judgment]:hover)>tr[data-judgment]:not(:hover):not(:focus-within){filter:blur(.6px);opacity:.86}
+  .result-card:hover{background:var(--pale);box-shadow:0 3px 12px #245d4820;transform:translateY(-1px)}
+  .comparison tbody tr[data-judgment]:hover{background:var(--pale);box-shadow:inset 3px 0 0 #88aa94}
+  .editorial>p[data-summary] a:hover,.comparison th[scope=row]>a:hover{background-position:0 100%;text-decoration:none}
 }
-#results:has(>.result-card:focus-visible)>.result-card:not(:focus-within),.with-reader .comparison tbody:has(>tr[data-judgment]:focus-visible)>tr[data-judgment]:not(:focus-within){filter:blur(.6px);opacity:.86}
 @media(prefers-reduced-motion:reduce){
-  .result-card,.with-reader .comparison tbody tr[data-judgment]{transition:none!important;transform:none!important;filter:none!important}
+  .result-card,.comparison tbody tr[data-judgment],.editorial>p[data-summary] a,.comparison th[scope=row]>a{transition:none!important;transform:none!important}
 }
