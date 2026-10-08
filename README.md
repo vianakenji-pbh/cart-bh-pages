@@ -1,4 +1,4 @@
-# Biblioteca CART-BH — versão estática para GitHub Pages
+# Carteiro — versão estática para GitHub Pages
 
 Esta pasta contém apenas a versão publicável, para uso no computador: HTML, CSS, JavaScript, D3 7.9.0 com licença ISC e dados JSON. Não exige servidor de aplicação, Node ou CDN. Não inclui PDFs locais; os botões abrem os documentos oficiais do CART-BH.
 

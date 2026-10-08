@@ -96,12 +96,12 @@ function tree(state) {
 }
 function searchForm(query = '') {return `<form class="search-box" id="search-form" role="search"><span class="search-icon" aria-hidden="true">⌕</span><input id="search-input" name="q" type="search" value="${esc(query)}" placeholder="Palavras, processo ou número do acórdão" aria-label="Pesquisar julgados"><button class="primary" type="submit">Pesquisar <span aria-hidden="true">→</span></button></form>`;}
 function bindSearch(state) {$('#search-form')?.addEventListener('submit', e => {e.preventDefault(); navigate(stateUrl({...state,view:state.view === 'theme' ? 'theme' : 'search'}, {q:$('#search-input').value.trim(),page:null,doc:null}));});}
-function footer() {return `<footer class="footer"><span>CART-BH · Conselho Administrativo de Recursos Tributários</span><span>Última coleta: ${esc(stats.collected.split('-').reverse().join('/'))}</span></footer>`;}
+function footer() {return `<footer class="footer"><span>GLFRI — Gerência de Lançamento, Fiscalização e Revisão de IPTU</span><span>Última coleta: ${esc(stats.collected.split('-').reverse().join('/'))}</span></footer>`;}
 function homeHeader(tab='themes') {
   return `<section class="hero"><p class="eyebrow">JURISPRUDÊNCIA ADMINISTRATIVA · BELO HORIZONTE</p>${searchForm()}<p class="hint">Pesquise nos ${fmt(stats.total)} registros por palavras, processo ou número do acórdão.</p><p class="collection-counts">${fmt(stats.instances.CRT)} acórdãos do CRT <span>·</span> ${fmt(stats.instances.JJT)} decisões da JJT</p></section><nav class="home-tabs" aria-label="Visualização da biblioteca"><a href="#/" data-nav ${tab==='themes'?'aria-current="page"':''}>Temas</a><a href="#/?tab=graph" data-nav ${tab==='graph'?'aria-current="page"':''}>Grafo</a><a href="#/pesquisa" data-nav>Busca geral</a></nav>`;
 }
 function home() {
-  document.title = 'Biblioteca CART-BH';
+  document.title = 'Carteiro';
   const t = themes[0], sub = t.subthemes[0];
   content.innerHTML = `<div class="intro">${homeHeader()}<section id="temas"><a class="theme-card" href="${themePath(t.id)}" data-nav><span class="card-num">SELEÇÃO TEMÁTICA</span><h1>${esc(t.name)}</h1><p class="card-subtheme">${esc(sub.name)}</p><p>${esc(sub.question)}</p><span class="card-foot"><span>${sub.count} acórdãos · ${sub.process_count} processos</span><span aria-hidden="true">→</span></span></a></section>${footer()}</div>`;
   bindSearch({view:'search'});
@@ -197,25 +197,25 @@ async function render(restore = false) {
     else if(state.view==='graph') {
       const [graph,doc]=await Promise.all([graphCache?Promise.resolve(graphCache):api('/data/graph'),state.doc?api('/data/document/'+encodeURIComponent(state.doc)):Promise.resolve(null)]);
       if(version!==generation)return;graphCache=graph;
-      document.title='Grafo geral · Biblioteca CART-BH';
+      document.title='Grafo geral · Carteiro';
       content.innerHTML=`<div class="graph-page ${doc?'has-reader':''}">${homeHeader('graph')}<div class="search-layout graph-layout ${doc?'with-reader':''}">${graphMarkup()}${doc?readerHtml(doc,state):''}</div>${footer()}</div>`;
       bindSearch({view:'search'});mountGraph(graph,state);if(doc)bindReader(doc);
     }
     else if (state.view === 'document') {
       const doc = await api('/data/document/'+encodeURIComponent(state.doc)); if (version !== generation) return;
-      document.title = `${doc.title} · Biblioteca CART-BH`;
+      document.title = `${doc.title} · Carteiro`;
       content.innerHTML = crumbs([[doc.title,null]]) + readerHtml(doc,state,true) + footer();bindReader(doc);
     } else {
       const visibleTheme=themes.find(t=>t.id===state.theme);
       if ((state.theme && !visibleTheme) || (state.subtheme && !visibleTheme?.subthemes.some(s=>s.id===state.subtheme))) {
-        document.title='Tema fora do recorte · Biblioteca CART-BH';
+        document.title='Tema fora do recorte · Carteiro';
         content.innerHTML=`${crumbs([['Tema fora do recorte atual',null]])}<h1 class="page-title">Tema fora do recorte atual</h1><p class="lead">Este tema ou subtema está fora da seleção temática apresentada nesta versão. Todos os julgados continuam disponíveis na busca geral.</p><a class="secondary" href="#/pesquisa" data-nav>Pesquisar no acervo completo →</a>${footer()}`;
         $('#main').focus({preventScroll:true});return;
       }
       if(state.view==='theme') {
         const doc=state.doc?await api('/data/document/'+encodeURIComponent(state.doc)):null;
         if(version!==generation)return;
-        document.title=`${visibleTheme.name} · Biblioteca CART-BH`;
+        document.title=`${visibleTheme.name} · Carteiro`;
         content.innerHTML=themeIntro(state)+`<div class="search-layout ${doc?'with-reader':''}"><section class="results-column" aria-label="Conteúdo temático">${thematicSections(state)}</section>${doc?readerHtml(doc,state):''}</div>`+footer();
         bindEditorialFilters(state);if(doc)bindReader(doc);
       } else {
@@ -226,7 +226,7 @@ async function render(restore = false) {
       for (const key of ['q','instance','tax','year','theme','subtheme','page']) if (state[key]) params.set(key,state[key]);
       const [results,doc] = await Promise.all([api('/data/search?'+params), state.doc ? api('/data/document/'+encodeURIComponent(state.doc)) : Promise.resolve(null)]);
       if (version !== generation) return;
-      document.title = `Pesquisa · Biblioteca CART-BH`;
+      document.title = `Pesquisa · Carteiro`;
       const emptyMessage = results.thematic_jjt_empty ? 'A JJT ainda não tem exemplos associados à taxonomia. Remova o filtro temático para pesquisar seus textos.' : 'Experimente outras palavras ou remova um dos filtros para ampliar a pesquisa.';
       content.innerHTML = `${crumbs([['Pesquisa',null]])}<p class="eyebrow">PESQUISA NO ACERVO</p><h1 class="page-title">Julgados e decisões</h1><div class="search-layout ${doc ? 'with-reader' : ''}"><section class="results-column" aria-label="Resultados da pesquisa">${searchForm(state.q)}${filters(state)}${activeFilters(state)}<div class="result-meta"><span>${fmt(results.total)} julgados encontrados</span><span>${state.q ? 'Por relevância' : 'Ano decrescente'}</span></div><div id="results">${results.items.length ? results.items.map(d=>resultCard(d,state)).join('') : `<div class="empty"><h3>Nenhum julgado encontrado</h3><p>${emptyMessage}</p>${results.thematic_jjt_empty ? '<button class="secondary" id="remove-theme">Remover filtro temático</button>' : '<button class="secondary" id="empty-clear">Limpar filtros</button>'}</div>`}</div><div class="pager"><a class="secondary ${results.page===1 ? 'disabled' : ''}" href="${esc(stateUrl(state,{page:Math.max(1,results.page-1),doc:null}))}" data-page="previous" aria-disabled="${results.page===1}">← Anterior</a><span>Página ${results.page} de ${results.pages}</span><a class="secondary ${results.page===results.pages ? 'disabled' : ''}" href="${esc(stateUrl(state,{page:results.page+1,doc:null}))}" data-page="next" aria-disabled="${results.page===results.pages}">Próxima →</a></div></section>${doc ? readerHtml(doc,state) : ''}</div>${footer()}`;
       bindSearch(state);
