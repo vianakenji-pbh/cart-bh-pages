@@ -2,7 +2,7 @@
 
 Esta pasta contém apenas a versão publicável, para uso no computador: HTML, CSS, JavaScript, D3 7.9.0 com licença ISC e dados JSON. Não exige servidor de aplicação, Node ou CDN. Não inclui PDFs locais; os botões abrem os documentos oficiais do CART-BH.
 
-O acervo contém 1.825 documentos (353 CRT e 1.472 JJT), um tema/subtema aprovado e grafo com 1.827 nós e 235 conexões. A síntese e o quadro mantêm 18 acórdãos de 16 processos, com filtros Todos 18 / A favor 13 / Contra 4 / Parcial 1, fontes e datas de publicação.
+O acervo contém 1.825 documentos (353 CRT e 1.472 JJT), um tema/subtema aprovado e grafo com 1.827 nós e 234 conexões. A síntese e o quadro mantêm 17 acórdãos de 15 processos, com filtros Todos 17 / A favor 13 / Contra 3 / Parcial 1, fontes, câmaras e datas de publicação.
 
 A navegação usa `#/...`, para funcionar na raiz ou sob uma subpasta sem regras de redirecionamento. Exemplos: `#/pesquisa`, `#/tema/poder_revisao/ciencia_fisco?resultado=contra`, `#/?tab=graph&doc=crt-11498` e `#/julgado/crt-11280`. Links diretos, recarga, histórico e leitor funcionam na hospedagem estática.
 
@@ -18,7 +18,7 @@ python -B -m unittest discover -s site -p test_pages.py -v
 node site/test_pages.cjs
 ```
 
-O gerador usa a Library existente, o conteúdo editorial e os arquivos atuais da interface. Ele falha explicitamente se os padrões de adaptação mudarem. A reconstrução gerencia somente arquivos listados em `build-manifest.json`, preservando `.git`, outros arquivos e este README já existente. O manifest traz contagens e SHA-256 dos arquivos gerenciados; não inclui o próprio hash. Para atualizar este README automaticamente, remova-o antes de regerar.
+O gerador usa uma cópia da Library existente e aplica `site/pages-overrides.json` exclusivamente à versão Pages. A taxonomia e o conteúdo editorial do protótipo permanecem preservados. Os rótulos do quadro classificam o impacto da baixa sobre a revisão; o resultado final do processo aparece separadamente. O CRT usa formulário POST para abrir o resultado individual na consulta oficial. O gerador falha explicitamente se os padrões de adaptação mudarem. A reconstrução gerencia somente arquivos listados em `build-manifest.json`, preservando `.git`, outros arquivos e os trechos manuais deste README; atualiza seu resumo de contagens. O manifest traz contagens e SHA-256 dos arquivos gerenciados; não inclui o próprio hash.
 
 ## Conferir localmente
 
