@@ -23,8 +23,10 @@ main{padding-top:28px}.hero{padding:10px 0 22px}.hero .eyebrow{margin-bottom:12p
 /* Destaque individual dos acórdãos; os demais itens permanecem legíveis. */
 .result-card{transition:background-color .18s ease,box-shadow .18s ease,transform .18s ease}
 .comparison tbody tr[data-judgment]{transition:background-color .18s ease,box-shadow .18s ease}
-.with-reader .comparison tbody tr[data-reader-card]{cursor:pointer}
-.result-card:focus-visible,.with-reader .comparison tbody tr[data-judgment]:focus-visible{outline:2px solid var(--green);outline-offset:3px;background:var(--pale);box-shadow:0 3px 12px #245d4820}
+.with-reader .comparison,.with-reader .comparison tbody{background:transparent}
+.with-reader .comparison tr{background:var(--white)}
+.comparison tbody tr[data-reader-card]{cursor:pointer}
+.result-card:focus-visible,.comparison tbody tr[data-judgment]:focus-visible{outline:2px solid var(--green);outline-offset:3px;background:var(--pale);box-shadow:0 3px 12px #245d4820}
 .comparison tbody tr[data-judgment]:focus-within{background:var(--pale);box-shadow:inset 3px 0 0 #88aa94}
 .judgment-chamber{display:block;font-size:10px;color:var(--green);font-weight:normal;line-height:1.5;margin-top:5px}
 .original-source{margin:0;display:inline-flex}

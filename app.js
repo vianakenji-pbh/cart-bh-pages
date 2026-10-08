@@ -254,10 +254,10 @@ async function render(restore = false) {
 
 /* Interações exclusivas da versão Pages: cartões, foco e seleção de texto. */
 function bindPagesCards(state) {
-  content.querySelectorAll('.result-card,.with-reader .comparison tbody tr[data-judgment]').forEach(card => {
+  content.querySelectorAll('.result-card,.comparison tbody tr[data-judgment]').forEach(card => {
     card.dataset.readerCard = card.dataset.result || card.dataset.judgment;
     card.tabIndex = 0;
-    card.setAttribute('role', 'link');
+    if(card.classList.contains('result-card'))card.setAttribute('role', 'link');
     card.setAttribute('aria-label', 'Ler ' + (card.querySelector('h3')?.textContent || 'acórdão ' + card.querySelector('th a')?.textContent));
     const open = () => {
       const anchor = card.dataset.judgment ? {selector:`[data-judgment="${card.dataset.judgment}"]`,top:Math.max(105,Math.min(innerHeight-120,card.getBoundingClientRect().top))} : null;
@@ -268,7 +268,7 @@ function bindPagesCards(state) {
       open();
     });
     card.addEventListener('keydown', event => {
-      if(event.target===card && event.key==='Enter'){event.preventDefault();open();}
+      if(event.target===card && event.key==='Enter' && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey){event.preventDefault();open();}
     });
   });
 }
