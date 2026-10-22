@@ -21,6 +21,7 @@ main{padding-top:28px}.hero{padding:10px 0 22px}.hero .eyebrow{margin-bottom:12p
 .side-main{margin-bottom:27px}.side-main a{display:block;padding:8px 10px;color:var(--muted);margin:0 0 4px;border-left:2px solid transparent}.side-main a[aria-current=page]{background:var(--pale);color:var(--green);border-left-color:var(--green);font-weight:600}
 
 /* Destaque individual dos acórdãos; os demais itens permanecem legíveis. */
+.pages-themes{display:grid;gap:18px}
 .result-card{transition:background-color .18s ease,box-shadow .18s ease,transform .18s ease}
 .comparison tbody tr[data-judgment]{transition:background-color .18s ease,box-shadow .18s ease}
 .with-reader .comparison,.with-reader .comparison tbody{background:transparent}

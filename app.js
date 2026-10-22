@@ -4,7 +4,7 @@ const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;',
 const fmt = value => Number(value).toLocaleString('pt-BR');
 const fold = text => String(text).normalize('NFD').replace(/\p{M}/gu, '').toLocaleLowerCase('pt-BR');
 const api = StaticLibrary.resource;
-let stats, themes, editorial, generation = 0, activeMatches = [], matchIndex = -1;
+let stats, themes, editorial, editorials, generation = 0, activeMatches = [], matchIndex = -1;
 let positions = new Map();
 let graphViews = new Map();
 try {graphViews = new Map(JSON.parse(sessionStorage.getItem('cart-pages-graphs:'+location.pathname) || '[]'));} catch { /* Estado opcional. */ }
@@ -100,12 +100,17 @@ function footer() {return `<footer class="footer"><span>GLFRI — Gerência de L
 function homeHeader(tab='themes') {
   return `<section class="hero"><p class="eyebrow">JURISPRUDÊNCIA ADMINISTRATIVA · BELO HORIZONTE</p>${searchForm()}<p class="hint">Pesquise nos ${fmt(stats.total)} registros por palavras, processo ou número do acórdão.</p><p class="collection-counts">${fmt(stats.instances.CRT)} acórdãos do CRT <span>·</span> ${fmt(stats.instances.JJT)} decisões da JJT</p></section><nav class="home-tabs" aria-label="Visualização da biblioteca"><a href="#/" data-nav ${tab==='themes'?'aria-current="page"':''}>Temas</a><a href="#/?tab=graph" data-nav ${tab==='graph'?'aria-current="page"':''}>Grafo</a><a href="#/pesquisa" data-nav>Busca geral</a></nav>`;
 }
+/* Capa estática: cada seleção aprovada conserva seu tema e seu subtema. */
 function home() {
   document.title = 'Carteiro';
-  const t = themes[0], sub = t.subthemes[0];
-  content.innerHTML = `<div class="intro">${homeHeader()}<section id="temas"><a class="theme-card" href="${themePath(t.id)}" data-nav><span class="card-num">SELEÇÃO TEMÁTICA</span><h1>${esc(t.name)}</h1><p class="card-subtheme">${esc(sub.name)}</p><p>${esc(sub.question)}</p><span class="card-foot"><span>${sub.count} acórdãos · ${sub.process_count} processos</span><span aria-hidden="true">→</span></span></a></section>${footer()}</div>`;
+  const cards = themes.map(theme => {
+    const sub = theme.subthemes[0];
+    return `<a class="theme-card" href="${themePath(theme.id)}" data-nav><span class="card-num">SELEÇÃO TEMÁTICA</span><h1>${esc(theme.name)}</h1><p class="card-subtheme">${esc(sub.name)}</p><p>${esc(sub.question)}</p><span class="card-foot"><span>${theme.count} acórdãos · ${theme.process_count} processos</span><span aria-hidden="true">→</span></span></a>`;
+  }).join('');
+  content.innerHTML = `<div class="intro">${homeHeader()}<section id="temas" class="pages-themes">${cards}</section>${footer()}</div>`;
   bindSearch({view:'search'});
 }
+
 function filters(state) {
   const option = (v,label,current) => `<option value="${esc(v)}" ${v === current ? 'selected' : ''}>${esc(label)}</option>`;
   const theme = themes.find(t => t.id === state.theme);
@@ -130,7 +135,7 @@ function themeIntro(state) {
 const resultLabels={a_favor:'A favor',contra:'Contra',parcial:'Parcial',a_conferir:'A conferir'};
 function resultFilters(state) {
   const selected=resultLabels[state.resultado]?state.resultado:'';
-  return `<div class="judgment-filters" role="group" aria-label="Filtrar quadro pelo impacto da baixa sobre a revisão"><button class="score all" data-result-filter="" aria-pressed="${selected===''}" aria-controls="judgment-table"><strong>${editorial.total_acordaos}</strong> Todos</button>${Object.entries(resultLabels).filter(([key])=>key!=='a_conferir'||editorial.totais[key]).map(([key,label])=>`<button class="score ${key}" data-result-filter="${key}" aria-pressed="${selected===key}" aria-controls="judgment-table"><strong>${editorial.totais[key]}</strong> ${label}</button>`).join('')}</div><p class="hint">${esc(editorial.classification_criterion)} ${editorial.total_acordaos} acórdãos correspondem a ${editorial.total_processos} processos.</p><p id="judgment-count" class="hint" role="status" aria-live="polite"></p>`;
+  return `<div class="judgment-filters" role="group" aria-label="Filtrar quadro por ${esc(editorial.result_heading)}"><button class="score all" data-result-filter="" aria-pressed="${selected===''}" aria-controls="judgment-table"><strong>${editorial.total_acordaos}</strong> Todos</button>${Object.entries(resultLabels).filter(([key])=>editorial.totais[key]>0).map(([key,label])=>`<button class="score ${key}" data-result-filter="${key}" aria-pressed="${selected===key}" aria-controls="judgment-table"><strong>${editorial.totais[key]}</strong> ${label}</button>`).join('')}</div><p class="hint">${esc(editorial.classification_criterion)} ${editorial.total_acordaos} acórdãos correspondem a ${editorial.total_processos} processos.</p><p id="judgment-count" class="hint" role="status" aria-live="polite"></p>`;
 }
 function summaryReferences(text, state) {
   const judgments = new Map(editorial.julgados.map(record => [record.numero, record.id]));
@@ -144,9 +149,9 @@ function thematicSections(state) {
   if(!state.subtheme)return `<section class="editorial"><h2>Síntese da controvérsia</h2><p>${esc(editorial.resumo_tema)}</p></section>`;
   const rows=editorial.julgados.map(record=>{
     const href=stateUrl(state,{doc:record.id}), sources=`<details class="sources"><summary>Fontes e trechos de apoio</summary>${record.fontes.map(source=>`<div><a href="${esc(source.tipo==='texto_publicado'?href:source.url)}" ${source.tipo==='texto_publicado'?'data-nav':'target="_blank" rel="noopener"'}>${source.tipo==='pdf'?'Voto / certidão em PDF':'Texto publicado'}${source.pagina?' · p. '+esc(source.pagina):''} ↗</a><blockquote>${esc(source.trecho)}</blockquote></div>`).join('')}</details>`;
-    return `<tr data-judgment="${record.id}" data-classification="${record.classificacao}" ${state.doc===record.id?'class="selected-judgment"':''}><th scope="row" data-label="Acórdão"><a href="${esc(href)}" data-nav>${esc(record.numero)}</a><small class="judgment-publication">Publicação: ${esc(record.data_publicacao || 'Não informada')}</small>${record.chamber?`<small class="judgment-chamber">${esc(record.chamber)}</small>`:''}</th><td data-label="Situação examinada">${esc(record.situacao)}</td><td data-label="Impacto da baixa / resultado final"><span class="score ${record.classificacao}">${resultLabels[record.classificacao]}</span><p>${esc(record.resultado)}</p>${record.observacao?`<p class="judgment-observation">${esc(record.observacao)}</p>`:''}</td><td data-label="Fundamento sobre ciência do Fisco">${esc(record.fundamento)}${sources}</td><td data-label="Documento"><a class="secondary" href="${esc(href)}" data-nav>Ler acórdão</a></td></tr>`;
+    return `<tr data-judgment="${record.id}" data-classification="${record.classificacao}" ${state.doc===record.id?'class="selected-judgment"':''}><th scope="row" data-label="Acórdão"><a href="${esc(href)}" data-nav>${esc(record.numero)}</a><small class="judgment-publication">Publicação: ${esc(record.data_publicacao || 'Não informada')}</small>${record.chamber?`<small class="judgment-chamber">${esc(record.chamber)}</small>`:''}</th><td data-label="Situação examinada">${esc(record.situacao)}</td><td data-label="${esc(editorial.result_heading)}"><span class="score ${record.classificacao}">${resultLabels[record.classificacao]}</span><p>${esc(record.resultado)}</p>${record.observacao?`<p class="judgment-observation">${esc(record.observacao)}</p>`:''}</td><td data-label="${esc(editorial.foundation_heading)}">${esc(record.fundamento)}${sources}</td><td data-label="Documento"><a class="secondary" href="${esc(href)}" data-nav>Ler acórdão</a></td></tr>`;
   }).join('');
-  return `<section class="editorial"><h2>Síntese dos julgamentos</h2>${editorial.resumo_subtema.map((p,index)=>`<p data-summary="${index}">${summaryReferences(p,state)}</p>`).join('')}<h2>Quadro comparativo dos ${editorial.total_acordaos} acórdãos</h2>${resultFilters(state)}<div class="comparison-wrap"><table class="comparison" id="judgment-table"><thead><tr><th>Acórdão</th><th>Situação examinada</th><th>Impacto da baixa / resultado final</th><th>Fundamento sobre ciência do Fisco</th><th>Documento</th></tr></thead><tbody>${rows}</tbody></table></div></section>`;
+  return `<section class="editorial"><h2>Síntese dos julgamentos</h2>${editorial.resumo_subtema.map((p,index)=>`<p data-summary="${index}">${summaryReferences(p,state)}</p>`).join('')}<h2>Quadro comparativo dos ${editorial.total_acordaos} acórdãos</h2>${resultFilters(state)}<div class="comparison-wrap"><table class="comparison" id="judgment-table"><thead><tr><th>Acórdão</th><th>Situação examinada</th><th>${esc(editorial.result_heading)}</th><th>${esc(editorial.foundation_heading)}</th><th>Documento</th></tr></thead><tbody>${rows}</tbody></table></div></section>`;
 }
 function bindEditorialFilters(state) {
   if(!$('#judgment-table'))return;
@@ -216,6 +221,8 @@ async function render(restore = false) {
         const doc=state.doc?await api('/data/document/'+encodeURIComponent(state.doc)):null;
         if(version!==generation)return;
         document.title=`${visibleTheme.name} · Carteiro`;
+        editorial=editorials[state.theme+'/'+(state.subtheme||visibleTheme.subthemes[0].id)];
+        if(!editorial)throw new Error('Conteúdo temático não encontrado.');
         content.innerHTML=themeIntro(state)+`<div class="search-layout ${doc?'with-reader':''}"><section class="results-column" aria-label="Conteúdo temático">${thematicSections(state)}</section>${doc?readerHtml(doc,state):''}</div>`+footer();
         bindEditorialFilters(state);if(doc)bindReader(doc);
       } else {
@@ -250,7 +257,7 @@ async function render(restore = false) {
     content.innerHTML=`<div class="error"><h1 class="page-title">Não foi possível abrir esta página</h1><p>${esc(error.message)}</p><a href="#/" data-nav>Voltar à biblioteca →</a></div>`;
   }
 }
-(async()=> {try {[stats,themes,editorial]=await Promise.all([api('/data/stats'),api('/data/themes'),api('/data/editorial')]);render(true);} catch(error) {content.innerHTML=`<div class="error">${esc(error.message)} Recarregue a página para tentar novamente.</div>`;}})();
+(async()=> {try {[stats,themes,editorials]=await Promise.all([api('/data/stats'),api('/data/themes'),api('/data/editorials')]);render(true);} catch(error) {content.innerHTML=`<div class="error">${esc(error.message)} Recarregue a página para tentar novamente.</div>`;}})();
 
 /* Interações exclusivas da versão Pages: cartões, foco e seleção de texto. */
 function bindPagesCards(state) {

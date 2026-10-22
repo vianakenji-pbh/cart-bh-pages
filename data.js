@@ -21,7 +21,7 @@ const StaticLibrary=(()=>{
   }
   async function resource(kind){
     const url=new URL(kind,location.origin),path=url.pathname;
-    const fixed={'/data/stats':'./data/stats.json','/data/themes':'./data/themes.json','/data/editorial':'./data/editorial.json','/data/graph':'./data/graph.json'};
+    const fixed={'/data/stats':'./data/stats.json','/data/themes':'./data/themes.json','/data/editorial':'./data/editorial.json','/data/editorials':'./data/editorials.json','/data/graph':'./data/graph.json'};
     if(fixed[path])return read(fixed[path]);
     if(path==='/data/search')return search(Object.fromEntries(url.searchParams));
     if(path.startsWith('/data/document/')){const id=path.slice('/data/document/'.length);if(!/^(?:crt|jjt)-\d+$/.test(id))throw new Error('Julgado não encontrado');return read('./data/documents/'+id+'.json');}

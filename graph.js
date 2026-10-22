@@ -18,14 +18,15 @@ function mountGraph(graph, state) {
   const canvas = $('#library-graph'), ctx = canvas.getContext('2d');
   const nodes = graph.nodes.map(n=>({...n})), byId = new Map(nodes.map(n=>[n.id,n]));
   const stored = savedGraph || {};
-  for (const [id,x,y,fx,fy] of stored.positions || []) if(byId.has(id))Object.assign(byId.get(id),{x,y,fx,fy});
+  const signature=JSON.stringify([nodes.map(node=>node.id).sort(),graph.links.map(link=>[link.type,link.source,link.target]).sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b)))]);
+  for (const [id,x,y,fx,fy] of stored.positions || []) if(byId.has(id)&&Number.isFinite(x)&&Number.isFinite(y))Object.assign(byId.get(id),{x,y,fx,fy});
   let view = {x:0,y:0,scale:1,...stored.view}, filters = {CRT:true,JJT:true,orphans:true,q:'',...stored.filters};
-  let selected = state.doc || stored.selected || null, hovered = null, drag = null, width=0,height=0, stable=!!stored.stable;
+  let selected = state.doc || stored.selected || null, hovered = null, drag = null, width=0,height=0, stable=!!stored.stable&&stored.signature===signature&&nodes.every(node=>Number.isFinite(node.x)&&Number.isFinite(node.y));
   let visible=[], links=[], visibleIds=new Set(), worker=null, frame=0, dirty=true, initialized=false, moved=!!stored.view;
   const adjacency = new Map(nodes.map(n=>[n.id,new Set()]));
   for(const l of graph.links){adjacency.get(l.source).add(l.target);adjacency.get(l.target).add(l.source);}
   const save = () => {
-    savedGraph={view:width&&height?{...view}:stored.view,width:width||stored.width,height:height||stored.height,filters:{...filters},selected,stable,positions:nodes.filter(n=>Number.isFinite(n.x)).map(n=>[n.id,n.x,n.y,n.fx??null,n.fy??null])};
+    savedGraph={signature,view:width&&height?{...view}:stored.view,width:width||stored.width,height:height||stored.height,filters:{...filters},selected,stable,positions:nodes.filter(n=>Number.isFinite(n.x)).map(n=>[n.id,n.x,n.y,n.fx??null,n.fy??null])};
     try{sessionStorage.setItem('cart-pages-general-graph:'+location.pathname,JSON.stringify(savedGraph));}catch{/* Memory state stays available. */}
   };
   const requestDraw=()=>{dirty=true;if(!frame)frame=requestAnimationFrame(()=>{frame=0;if(dirty)draw();});};
