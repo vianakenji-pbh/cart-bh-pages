@@ -22,6 +22,8 @@ main{padding-top:28px}.hero{padding:10px 0 22px}.hero .eyebrow{margin-bottom:12p
 
 /* Destaque individual dos acórdãos; os demais itens permanecem legíveis. */
 .pages-themes{display:grid;gap:18px}
+.tree-heading{display:flex;align-items:center;gap:7px;padding:9px 6px;margin:0;border-radius:4px;font-size:13px;font-weight:400;line-height:1.45}
+.tree-heading a{flex:1;color:var(--ink)}.tree-heading small{font-size:10px;font-weight:400;color:var(--muted)}.tree-item.active .tree-heading,.tree-heading:focus-within{background:var(--pale)}
 .result-card{transition:background-color .18s ease,box-shadow .18s ease,transform .18s ease}
 .comparison tbody tr[data-judgment]{transition:background-color .18s ease,box-shadow .18s ease}
 .with-reader .comparison,.with-reader .comparison tbody{background:transparent}

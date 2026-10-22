@@ -35,7 +35,7 @@ function stateUrl(state, changes = {}) {
   for (const key of ['q','instance','tax','year','theme','subtheme','page','doc','mode']) {
     if (merged[key] && !(merged.view === 'theme' && ['theme','subtheme'].includes(key))) p.set(key, merged[key]);
   }
-  if(merged.view==='theme' && merged.subtheme && resultLabels[merged.resultado])p.set('resultado',merged.resultado);
+  if(merged.view==='theme' && merged.subtheme && resultLabels[merged.resultado] && editorials?.[merged.theme+'/'+merged.subtheme]?.exibir_quadro!==false)p.set('resultado',merged.resultado);
   return routeHref(path + (p.size ? '?' + p : ''));
 }
 function navigate(url, {replace = false, restore = false, anchor = null} = {}) {
@@ -90,10 +90,18 @@ function textHtml(text, query = '') {
   }).join('');
 }
 function crumbs(items) {return `<nav class="crumbs" aria-label="Caminho"><a href="#/" data-nav>Biblioteca</a>${items.map(([name,url]) => ` <span aria-hidden="true">/</span> ${url ? `<a href="${esc(url)}" data-nav>${esc(name)}</a>` : `<span>${esc(name)}</span>`}`).join('')}</nav>`;}
+/* Índice sempre visível, sem controles de recolhimento. */
 function tree(state) {
-  for(const [selector,view] of [['.side-home','home'],['.side-search','search']]){const link=$(selector);if(state.view===view)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');}
-  $('#theme-tree').innerHTML = themes.map(t => `<details class="tree-item ${state.view==='theme' && state.theme === t.id ? 'active' : ''}" ${state.view==='theme' && state.theme === t.id ? 'open' : ''}><summary><a href="${themePath(t.id)}" data-nav>${esc(t.name)}</a><small>${t.count}</small></summary><div class="subtree">${t.subthemes.map(s => `<a href="${themePath(t.id,s.id)}" data-nav class="${state.view==='theme' && state.subtheme === s.id && state.theme === t.id ? 'active' : ''}">${esc(s.name)}</a>`).join('')}</div></details>`).join('');
+  for(const [selector,view] of [['.side-home','home'],['.side-search','search']]){
+    const link=$(selector);
+    if(state.view===view)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');
+  }
+  $('#theme-tree').innerHTML=themes.map(theme=>{
+    const active=state.view==='theme'&&state.theme===theme.id;
+    return `<section class="tree-item ${active?'active':''}" aria-labelledby="theme-label-${esc(theme.id)}"><h2 class="tree-heading" id="theme-label-${esc(theme.id)}"><a href="${themePath(theme.id)}" data-nav ${active&&!state.subtheme?'aria-current="page"':''}>${esc(theme.name)}</a><small>${theme.count}</small></h2><div class="subtree">${theme.subthemes.map(sub=>`<a href="${themePath(theme.id,sub.id)}" data-nav ${active&&state.subtheme===sub.id?'class="active" aria-current="page"':''}>${esc(sub.id==='pedologia'?'fator pedologia':sub.name)}</a>`).join('')}</div></section>`;
+  }).join('');
 }
+
 function searchForm(query = '') {return `<form class="search-box" id="search-form" role="search"><span class="search-icon" aria-hidden="true">⌕</span><input id="search-input" name="q" type="search" value="${esc(query)}" placeholder="Palavras, processo ou número do acórdão" aria-label="Pesquisar julgados"><button class="primary" type="submit">Pesquisar <span aria-hidden="true">→</span></button></form>`;}
 function bindSearch(state) {$('#search-form')?.addEventListener('submit', e => {e.preventDefault(); navigate(stateUrl({...state,view:state.view === 'theme' ? 'theme' : 'search'}, {q:$('#search-input').value.trim(),page:null,doc:null}));});}
 function footer() {return `<footer class="footer"><span>GLFRI — Gerência de Lançamento, Fiscalização e Revisão de IPTU</span><span>Última coleta: ${esc(stats.collected.split('-').reverse().join('/'))}</span></footer>`;}
@@ -147,6 +155,7 @@ function summaryReferences(text, state) {
 function thematicSections(state) {
   if(!editorial)return '';
   if(!state.subtheme)return `<section class="editorial"><h2>Síntese da controvérsia</h2><p>${esc(editorial.resumo_tema)}</p></section>`;
+  if(editorial.exibir_quadro===false)return `<section class="editorial"><h2>Síntese dos julgamentos</h2>${editorial.resumo_subtema.map((p,index)=>`<p data-summary="${index}">${summaryReferences(p,state)}</p>`).join('')}</section>`;
   const rows=editorial.julgados.map(record=>{
     const href=stateUrl(state,{doc:record.id}), sources=`<details class="sources"><summary>Fontes e trechos de apoio</summary>${record.fontes.map(source=>`<div><a href="${esc(source.tipo==='texto_publicado'?href:source.url)}" ${source.tipo==='texto_publicado'?'data-nav':'target="_blank" rel="noopener"'}>${source.tipo==='pdf'?'Voto / certidão em PDF':'Texto publicado'}${source.pagina?' · p. '+esc(source.pagina):''} ↗</a><blockquote>${esc(source.trecho)}</blockquote></div>`).join('')}</details>`;
     return `<tr data-judgment="${record.id}" data-classification="${record.classificacao}" ${state.doc===record.id?'class="selected-judgment"':''}><th scope="row" data-label="Acórdão"><a href="${esc(href)}" data-nav>${esc(record.numero)}</a><small class="judgment-publication">Publicação: ${esc(record.data_publicacao || 'Não informada')}</small>${record.chamber?`<small class="judgment-chamber">${esc(record.chamber)}</small>`:''}</th><td data-label="Situação examinada">${esc(record.situacao)}</td><td data-label="${esc(editorial.result_heading)}"><span class="score ${record.classificacao}">${resultLabels[record.classificacao]}</span><p>${esc(record.resultado)}</p>${record.observacao?`<p class="judgment-observation">${esc(record.observacao)}</p>`:''}</td><td data-label="${esc(editorial.foundation_heading)}">${esc(record.fundamento)}${sources}</td><td data-label="Documento"><a class="secondary" href="${esc(href)}" data-nav>Ler acórdão</a></td></tr>`;

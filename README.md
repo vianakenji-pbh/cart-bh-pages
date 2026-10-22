@@ -2,7 +2,7 @@
 
 Esta pasta contém apenas a versão publicável, para uso no computador: HTML, CSS, JavaScript, D3 7.9.0 com licença ISC e dados JSON. Não exige servidor de aplicação, Node ou CDN. Não inclui PDFs locais; os botões abrem os documentos oficiais do CART-BH.
 
-O acervo contém 1.825 documentos (353 CRT e 1.472 JJT), 2 temas e 2 subtemas aprovados e grafo com 1.829 nós e 239 conexões. As seleções abrangem 21 acórdãos de 19 processos distintos, com fontes, câmaras e datas de publicação. baixa de construção, regularização e ciência do Fisco: 17 acórdãos de 15 processos (Todos 17 / A favor 13 / Contra 3 / Parcial 1); Fator pedologia: 4 acórdãos de 4 processos (Todos 4 / A favor 2 / Contra 2).
+O acervo contém 1.825 documentos (353 CRT e 1.472 JJT), 2 temas e 2 subtemas aprovados e grafo com 1.829 nós e 239 conexões. As seleções abrangem 21 acórdãos de 19 processos distintos, com fontes, câmaras e datas de publicação. baixa de construção, regularização e ciência do Fisco: 17 acórdãos de 15 processos (Todos 17 / A favor 13 / Contra 3 / Parcial 1); Fator pedologia: 4 acórdãos de 4 processos (síntese com links para leitura).
 
 A navegação usa `#/...`, para funcionar na raiz ou sob uma subpasta sem regras de redirecionamento. Exemplos: `#/pesquisa`, `#/tema/poder_revisao/ciencia_fisco?resultado=contra`, `#/?tab=graph&doc=crt-11498` e `#/julgado/crt-11280`. Links diretos, recarga, histórico e leitor funcionam na hospedagem estática.
 
