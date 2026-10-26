@@ -98,7 +98,7 @@ function tree(state) {
   }
   $('#theme-tree').innerHTML=themes.map(theme=>{
     const active=state.view==='theme'&&state.theme===theme.id;
-    return `<section class="tree-item ${active?'active':''}" aria-labelledby="theme-label-${esc(theme.id)}"><h2 class="tree-heading" id="theme-label-${esc(theme.id)}"><a href="${themePath(theme.id)}" data-nav ${active&&!state.subtheme?'aria-current="page"':''}>${esc(theme.name)}</a><small>${theme.count}</small></h2><div class="subtree">${theme.subthemes.map(sub=>`<a href="${themePath(theme.id,sub.id)}" data-nav ${active&&state.subtheme===sub.id?'class="active" aria-current="page"':''}>${esc(sub.id==='pedologia'?'fator pedologia':sub.name)}</a>`).join('')}</div></section>`;
+    return `<section class="tree-item ${active?'active':''}" aria-labelledby="theme-label-${esc(theme.id)}"><h2 class="tree-heading" id="theme-label-${esc(theme.id)}"><a href="${themePath(theme.id)}" data-nav ${active&&!state.subtheme?'aria-current="page"':''}>${esc(theme.name)}</a><small>${theme.count}</small></h2><div class="subtree">${theme.subthemes.map(sub=>`<a href="${themePath(theme.id,sub.id)}" data-nav ${active&&state.subtheme===sub.id?'class="active" aria-current="page"':''}>${esc(sub.name.replace(/^./u,letter=>letter.toLocaleLowerCase('pt-BR')))}</a>`).join('')}</div></section>`;
   }).join('');
 }
 
@@ -112,8 +112,9 @@ function homeHeader(tab='themes') {
 function home() {
   document.title = 'Carteiro';
   const cards = themes.map(theme => {
-    const sub = theme.subthemes[0];
-    return `<a class="theme-card" href="${themePath(theme.id)}" data-nav><span class="card-num">SELEÇÃO TEMÁTICA</span><h1>${esc(theme.name)}</h1><p class="card-subtheme">${esc(sub.name)}</p><p>${esc(sub.question)}</p><span class="card-foot"><span>${theme.count} acórdãos · ${theme.process_count} processos</span><span aria-hidden="true">→</span></span></a>`;
+    const names = theme.subthemes.map(sub=>esc(sub.name)).join(' · ');
+    const description = theme.subthemes.length===1?theme.subthemes[0].question:theme.scope;
+    return `<a class="theme-card" href="${themePath(theme.id)}" data-nav><span class="card-num">SELEÇÃO TEMÁTICA</span><h1>${esc(theme.name)}</h1><p class="card-subtheme">${names}</p><p>${esc(description)}</p><span class="card-foot"><span>${theme.count} acórdãos · ${theme.process_count} processos</span><span aria-hidden="true">→</span></span></a>`;
   }).join('');
   content.innerHTML = `<div class="intro">${homeHeader()}<section id="temas" class="pages-themes">${cards}</section>${footer()}</div>`;
   bindSearch({view:'search'});
@@ -154,8 +155,8 @@ function summaryReferences(text, state) {
 }
 function thematicSections(state) {
   if(!editorial)return '';
-  if(!state.subtheme)return `<section class="editorial"><h2>Síntese da controvérsia</h2><p>${esc(editorial.resumo_tema)}</p></section>`;
-  if(editorial.exibir_quadro===false)return `<section class="editorial"><h2>Síntese dos julgamentos</h2>${editorial.resumo_subtema.map((p,index)=>`<p data-summary="${index}">${summaryReferences(p,state)}</p>`).join('')}</section>`;
+  if(!state.subtheme)return `<section class="editorial"><h2>Síntese da controvérsia</h2><p>${esc(themes.find(theme=>theme.id===state.theme)?.resumo_tema||editorial.resumo_tema)}</p></section>`;
+  if(editorial.exibir_quadro===false)return `<section class="editorial"><h2>Síntese dos julgamentos</h2>${editorial.resumo_subtema.map((p,index)=>`<p data-summary="${index}">${summaryReferences(p,state)}</p>`).join('')}${editorial.exibir_fontes?editorialSources(state):''}</section>`;
   const rows=editorial.julgados.map(record=>{
     const href=stateUrl(state,{doc:record.id}), sources=`<details class="sources"><summary>Fontes e trechos de apoio</summary>${record.fontes.map(source=>`<div><a href="${esc(source.tipo==='texto_publicado'?href:source.url)}" ${source.tipo==='texto_publicado'?'data-nav':'target="_blank" rel="noopener"'}>${source.tipo==='pdf'?'Voto / certidão em PDF':'Texto publicado'}${source.pagina?' · p. '+esc(source.pagina):''} ↗</a><blockquote>${esc(source.trecho)}</blockquote></div>`).join('')}</details>`;
     return `<tr data-judgment="${record.id}" data-classification="${record.classificacao}" ${state.doc===record.id?'class="selected-judgment"':''}><th scope="row" data-label="Acórdão"><a href="${esc(href)}" data-nav>${esc(record.numero)}</a><small class="judgment-publication">Publicação: ${esc(record.data_publicacao || 'Não informada')}</small>${record.chamber?`<small class="judgment-chamber">${esc(record.chamber)}</small>`:''}</th><td data-label="Situação examinada">${esc(record.situacao)}</td><td data-label="${esc(editorial.result_heading)}"><span class="score ${record.classificacao}">${resultLabels[record.classificacao]}</span><p>${esc(record.resultado)}</p>${record.observacao?`<p class="judgment-observation">${esc(record.observacao)}</p>`:''}</td><td data-label="${esc(editorial.foundation_heading)}">${esc(record.fundamento)}${sources}</td><td data-label="Documento"><a class="secondary" href="${esc(href)}" data-nav>Ler acórdão</a></td></tr>`;
@@ -204,6 +205,8 @@ function toast(message) {$('#toast').textContent=message;$('#toast').classList.a
 async function render(restore = false) {
   graphController?.destroy();graphController=null;
   const version = ++generation, state = locationState();
+  const alias=stats.route_aliases?.[state.theme+'/'+(state.subtheme||'')];
+  if(alias){const [theme,subtheme]=alias.split('/');navigate(stateUrl({...state,theme,subtheme}),{replace:true});return;}
   if(state.mode==='graph'){navigate('/?tab=graph'+(state.doc?'&doc='+encodeURIComponent(state.doc):''),{replace:true});return;}
   try {
     tree(state);
@@ -287,4 +290,15 @@ function bindPagesCards(state) {
       if(event.target===card && event.key==='Enter' && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey){event.preventDefault();open();}
     });
   });
+}
+
+function editorialSources(state) {
+  return `<details class="editorial-sources"><summary>Fontes da síntese</summary>${editorial.julgados.map(record=>{
+    const href=stateUrl(state,{doc:record.id});
+    return `<section class="editorial-source"><h3><a href="${esc(href)}" data-nav>Acórdão ${esc(record.numero)}</a></h3><p class="source-publication">${esc(record.chamber)} · Publicação: ${esc(record.data_publicacao||'Não informada')}</p>${record.fontes.map(source=>{
+      const published=source.tipo==='texto_publicado';
+      const label=published?'Texto publicado':source.tipo==='pdf_ocr'?'PDF · trecho obtido por OCR':'Voto / certidão em PDF';
+      return `<div class="source-excerpt"><a href="${esc(published?href:source.url)}" ${published?'data-nav':'target="_blank" rel="noopener"'}>${label}${source.pagina?' · p. '+esc(source.pagina):''} ↗</a>${source.nota?`<p class="source-note">${esc(source.nota)}</p>`:''}<blockquote>${esc(source.trecho)}</blockquote></div>`;
+    }).join('')}${record.observacao?`<p class="source-note">${esc(record.observacao)}</p>`:''}</section>`;
+  }).join('')}</details>`;
 }
