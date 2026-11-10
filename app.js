@@ -293,12 +293,10 @@ function bindPagesCards(state) {
 }
 
 function editorialSources(state) {
-  return `<details class="editorial-sources"><summary>Fontes da síntese</summary>${editorial.julgados.map(record=>{
+  const records=[...new Map(editorial.julgados.map(record=>[record.id,record])).values()];
+  return `<section class="editorial-sources" aria-labelledby="editorial-sources-heading"><h2 id="editorial-sources-heading">Acórdãos mencionados</h2><ol class="editorial-source-list">${records.map(record=>{
     const href=stateUrl(state,{doc:record.id});
-    return `<section class="editorial-source"><h3><a href="${esc(href)}" data-nav>Acórdão ${esc(record.numero)}</a></h3><p class="source-publication">${esc(record.chamber)} · Publicação: ${esc(record.data_publicacao||'Não informada')}</p>${record.fontes.map(source=>{
-      const published=source.tipo==='texto_publicado';
-      const label=published?'Texto publicado':source.tipo==='pdf_ocr'?'PDF · trecho obtido por OCR':'Voto / certidão em PDF';
-      return `<div class="source-excerpt"><a href="${esc(published?href:source.url)}" ${published?'data-nav':'target="_blank" rel="noopener"'}>${label}${source.pagina?' · p. '+esc(source.pagina):''} ↗</a>${source.nota?`<p class="source-note">${esc(source.nota)}</p>`:''}<blockquote>${esc(source.trecho)}</blockquote></div>`;
-    }).join('')}${record.observacao?`<p class="source-note">${esc(record.observacao)}</p>`:''}</section>`;
-  }).join('')}</details>`;
+    const metadata=[record.chamber,`Publicação: ${record.data_publicacao||'Não informada'}`].filter(Boolean).join(' · ');
+    return `<li class="editorial-source" data-source-document="${esc(record.id)}"><a class="source-entry" href="${esc(href)}" data-nav><h3>Acórdão ${esc(record.numero)}</h3><p class="source-publication">${esc(metadata)}</p></a></li>`;
+  }).join('')}</ol></section>`;
 }

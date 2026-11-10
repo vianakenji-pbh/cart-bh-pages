@@ -1,6 +1,8 @@
 'use strict';
 let graphController = null, graphCache = null;
-const graphColors = {CRT:'#245d48',JJT:'#a47b40',theme:'#395a8e',subtheme:'#93719d'};
+const graphStyle=getComputedStyle(document.documentElement);
+const graphColor=name=>graphStyle.getPropertyValue(name).trim();
+const graphColors={CRT:graphColor('--graph-crt'),JJT:graphColor('--graph-jjt'),theme:graphColor('--graph-theme'),subtheme:graphColor('--graph-subtheme')};
 let savedGraph = null;
 try {savedGraph = JSON.parse(sessionStorage.getItem('cart-pages-general-graph:'+location.pathname));} catch { /* Optional state. */ }
 function graphMarkup() {
@@ -37,20 +39,20 @@ function mountGraph(graph, state) {
     ctx.save();ctx.translate(view.x,view.y);ctx.scale(view.scale,view.scale);
     for(const link of links){const a=byId.get(link.source),b=byId.get(link.target);if(!Number.isFinite(a.x)||!Number.isFinite(b.x))continue;
       const related=focusVisible&&(a.id===focus||b.id===focus);
-      ctx.globalAlpha=focusVisible?(related?.9:.09):.35;ctx.strokeStyle=related?'#245d48':link.type==='tematico'?'#8a779b':'#9ca49a';
+      ctx.globalAlpha=focusVisible?(related?.9:.09):.35;ctx.strokeStyle=related?graphColor('--graph-edge-active'):link.type==='tematico'?graphColor('--graph-edge-theme'):graphColor('--graph-edge');
       ctx.lineWidth=(related?1.7:.8)/view.scale;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
     const labels=[];
     for(const n of visible){if(!Number.isFinite(n.x))continue;const related=n.id===focus||neighbors?.has(n.id);
       ctx.globalAlpha=focusVisible?(related?1:.22):.85;ctx.fillStyle=graphColors[n.instance||n.type];
-      const radius=(n.type==='document'?Math.max(3.4,1.4/view.scale):Math.max(8,3/view.scale))+(n.id===focus?2/view.scale:0);ctx.beginPath();ctx.arc(n.x,n.y,radius,0,2*Math.PI);ctx.fill();
-      if(n.id===selected){ctx.strokeStyle='#202e26';ctx.lineWidth=2/view.scale;ctx.stroke();}
+      const radius=(n.type==='document'?Math.max(3.4,1.4/view.scale):Math.max(8,3/view.scale))+(n.id===focus?2/view.scale:0);ctx.beginPath();ctx.arc(n.x,n.y,radius,0,2*Math.PI);ctx.fill();if(n.instance==='JJT'||n.type==='subtheme'){ctx.strokeStyle=graphColor('--graph-node-outline');ctx.lineWidth=.6/view.scale;ctx.stroke();}
+      if(n.id===selected){ctx.strokeStyle=graphColor('--graph-selected');ctx.lineWidth=2/view.scale;ctx.stroke();}
       if(n.id===focus || (related&&focusVisible) || (view.scale>1.3) || n.type!=='document') labels.push({n,priority:n.id===focus?0:related?1:n.type!=='document'?2:3});}
     ctx.restore();ctx.globalAlpha=1;ctx.font='11px Segoe UI, sans-serif';const boxes=[];
     labels.sort((a,b)=>a.priority-b.priority);
     for(const {n,priority} of labels){const x=n.x*view.scale+view.x+9,y=n.y*view.scale+view.y-7;if(x<0||x>width||y<0||y>height)continue;
       const label=n.label.length>65?n.label.slice(0,62)+'…':n.label,w=ctx.measureText(label).width;
       const box={x,y:y-11,w:w+7,h:16};if(priority>0&&boxes.some(b=>box.x<b.x+b.w&&box.x+box.w>b.x&&box.y<b.y+b.h&&box.y+box.h>b.y))continue;
-      boxes.push(box);ctx.fillStyle='#fffefae8';ctx.fillRect(box.x-2,box.y,box.w,box.h);ctx.fillStyle='#303b35';ctx.fillText(label,x,y);}
+      boxes.push(box);ctx.fillStyle=graphColor('--graph-label-bg');ctx.fillRect(box.x-2,box.y,box.w,box.h);ctx.fillStyle=graphColor('--graph-label-ink');ctx.fillText(label,x,y);}
     $('#graph-zoom').textContent=Math.round(view.scale*100)+'%';
     canvas.dataset.scale=String(view.scale);canvas.dataset.selected=selected||'';canvas.dataset.stable=String(stable);
   }

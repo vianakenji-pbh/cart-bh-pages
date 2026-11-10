@@ -22,7 +22,8 @@ main{padding-top:28px}.hero{padding:10px 0 22px}.hero .eyebrow{margin-bottom:12p
 
 /* Destaque individual dos acórdãos; os demais itens permanecem legíveis. */
 .pages-themes{display:grid;gap:18px}
-.editorial-sources{margin:24px 0;border-top:1px solid var(--line);padding-top:16px}.editorial-sources>summary{cursor:pointer;color:var(--green);font-size:13px}.editorial-source{border-bottom:1px solid var(--line);padding:14px 0}.editorial-source h3{font:normal 20px var(--serif);margin:0 0 6px}.source-publication,.source-note{font-size:11px;color:var(--muted)}.source-excerpt{font-size:12px;margin:12px 0}.source-excerpt blockquote{margin:7px 0;padding-left:12px;border-left:2px solid var(--line);white-space:pre-line;overflow-wrap:anywhere;color:var(--muted)}
+.editorial-sources{margin:24px 0;border-top:1px solid var(--line);padding-top:16px}.editorial-sources>h2{margin:0 0 12px}.editorial-source-list{list-style:none;margin:0;padding:0}.editorial-source{border-bottom:1px solid var(--line)}.source-entry{display:block;padding:10px 8px;border-radius:4px;color:inherit;text-decoration:none;transition:background-color .18s ease}.source-entry h3{font:normal 18px var(--serif);color:var(--green);margin:0 0 3px}.source-publication{font-size:11px;color:var(--muted);margin:0}.source-entry:focus-visible{outline:2px solid var(--green);outline-offset:2px;background:var(--pale)}
+@media(hover:hover) and (pointer:fine){.source-entry:hover{background:var(--pale);text-decoration:none}}
 .tree-heading{display:flex;align-items:center;gap:7px;padding:9px 6px;margin:0;border-radius:4px;font-size:13px;font-weight:400;line-height:1.45}
 .tree-heading a{flex:1;color:var(--ink)}.tree-heading small{font-size:10px;font-weight:400;color:var(--muted)}.tree-item.active .tree-heading,.tree-heading:focus-within{background:var(--pale)}
 .result-card{transition:background-color .18s ease,box-shadow .18s ease,transform .18s ease}
@@ -44,3 +45,55 @@ main{padding-top:28px}.hero{padding:10px 0 22px}.hero .eyebrow{margin-bottom:12p
 @media(prefers-reduced-motion:reduce){
   .result-card,.comparison tbody tr[data-judgment],.editorial>p[data-summary] a,.comparison th[scope=row]>a{transition:none!important;transform:none!important}
 }
+
+/* Wada v2-152: https://wada.ink/palettes/v2-152. Papel, superfície, pale azul, bordas e fundos semânticos são derivados suaves. */
+:root{
+  --paper:#fbf5ef;--white:#fffdf9;--ink:#243a39;--muted:#547076;
+  --line:#cbd9da;--green:#004f46;--pale:#e6f1f5;
+  --link:#064f6e;--link-hover:#fdd4bd;--focus:#064f6e;
+  --graph-crt:#004f46;--graph-jjt:#fcb315;--graph-theme:#064f6e;--graph-subtheme:#f37f94;
+  --graph-edge-active:#004f46;--graph-edge-theme:#547076;--graph-edge:#8ba7ae;
+  --graph-selected:#243a39;--graph-node-outline:#243a39;--graph-label-bg:#fffdf9eb;--graph-label-ink:#243a39;
+}
+a,.text-button,.sources summary{color:var(--link)}
+:focus-visible,.search-box:focus-within{outline-color:var(--focus)}
+.brand,.tree-heading a,.theme-card,.subtheme-card,.result-card h3 a{color:var(--ink)}
+.brand:hover,.topbar nav a:hover,.side-home:hover,.side-main a:hover{color:var(--link)}
+.topbar,.sidebar{background:var(--paper)}
+.search-box{border-color:#a7c2c9;box-shadow:0 3px 15px #064f6e12}
+.search-icon,.hero h1 em,.stat strong,.card-foot,.subtheme-card span,.reader-section>h3,
+.editorial h2,.page-title,.theme-card h1,.theme-card h3,.subtheme-card h3,.reader .doc-title{color:var(--green)}
+.primary{background:var(--green);border-color:var(--green);color:var(--white)}
+.primary:hover{background:#00675d;border-color:#00675d}
+.secondary{color:var(--link);border-color:#a7c2c9}
+.secondary:hover{border-color:var(--link);background:var(--pale);color:var(--link)}
+.theme-card:hover,.subtheme-card:hover{border-color:#a7d4e4;background:var(--pale)}
+.card-num,.tree-item summary:before{color:var(--muted)}
+.coverage{background:var(--pale);border-left-color:var(--link);color:var(--ink)}
+.chip,.badge,.score{background:var(--pale);color:var(--green)}
+.badge.jjt{background:#fff0c4;color:#614900}
+.result-card:hover,.result-card.selected,.source-entry:hover,.source-entry:focus-visible,
+.comparison tbody tr[data-judgment]:hover,.comparison tbody tr[data-judgment]:focus-within{background:var(--pale)}
+.result-card.selected{border-left-color:var(--link)}
+.result-summary{color:var(--ink)}
+.result-card:focus-visible,.comparison tbody tr[data-judgment]:focus-visible,.source-entry:focus-visible{outline-color:var(--focus)}
+.result-card:focus-visible,.comparison tbody tr[data-judgment]:focus-visible,.result-card:hover{box-shadow:0 3px 12px #064f6e1f}
+.comparison tbody tr[data-judgment]:focus-within,.comparison tbody tr[data-judgment]:hover{box-shadow:inset 3px 0 0 var(--link)}
+.source-entry h3,.judgment-chamber{color:var(--link)}
+.source-entry:hover h3,.source-entry:focus-visible h3{color:var(--green)}
+.editorial>p[data-summary] a,.comparison th[scope=row]>a{
+  color:var(--link);border-bottom-color:var(--link-hover);
+  background-image:linear-gradient(to top,var(--link-hover) 50%,transparent 50%);
+}
+.score.contra{background:#fde5e9;color:#763345}
+.score.parcial{background:#fff0c4;color:#614900}
+.score.a_conferir{background:var(--pale);color:var(--link)}
+.judgment-filters .score[aria-pressed=true]{box-shadow:0 1px 4px #064f6e22}
+.comparison thead{background:var(--pale);color:var(--green)}
+.with-reader .comparison tr.selected-judgment{border-color:var(--link);background:var(--pale)}
+mark{background:#fff0b8;color:var(--ink)}.current-match{background:#fcb315;outline-color:#987006}
+.error{background:#fde5e9;border-color:#e9acb8;color:var(--ink)}
+.graph-legend .crt:before{background:var(--graph-crt)}
+.graph-legend .jjt:before{background:var(--graph-jjt);border:1px solid var(--ink)}
+.graph-legend .theme:before{background:var(--graph-theme)}
+.graph-legend .subtheme:before{background:var(--graph-subtheme);border:1px solid var(--ink)}
